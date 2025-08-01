@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kasino Online</title>
+  <style>
+    /* Reset Margin dan Padding */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* Background Kasino */
+    body {
+      background: #1b1b1b;
+      font-family: 'Arial', sans-serif;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+      text-align: center;
+    }
+
+    .container {
+      position: relative;
+      width: 80%;
+      height: 80%;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Mesin Roulette */
+    .roulette {
+      position: relative;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, #444444, #1a1a1a);
+      border-radius: 50%;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border: 10px solid #ff0000;
+    }
+
+    /* Container untuk benda-benda yang berputar */
+    .items-container {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      pointer-events: none;
+      transform-origin: center;
+    }
+
+    /* Benda-Benda yang Berputar (Koin-koin) */
+    .item {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      background-color: gold;
+      border-radius: 50%;
+      box-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
+      transform-origin: center;
+    }
+
+    /* Posisi awal benda-benda */
+    .item:nth-child(1) {
+      top: 0;
+      left: 50%;
+      margin-left: -20px;
+    }
+
+    .item:nth-child(2) {
+      top: 50%;
+      left: 100%;
+      margin-top: -20px;
+      margin-left: -40px;
+    }
+
+    .item:nth-child(3) {
+      bottom: 0;
+      left: 50%;
+      margin-left: -20px;
+    }
+
+    .item:nth-child(4) {
+      top: 50%;
+      left: 0;
+      margin-top: -20px;
+      margin-left: -40px;
+    }
+
+    /* Animasi berputar untuk container benda */
+    @keyframes spinItems {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Tombol Spin */
+    .spin-btn {
+      position: absolute;
+      bottom: 40px;
+      width: 120px;
+      height: 40px;
+      background-color: #ff0000;
+      border-radius: 20px;
+      color: white;
+      font-size: 18px;
+      cursor: pointer;
+      box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+      border: none;
+      transition: background-color 0.3s ease;
+    }
+
+    .spin-btn:hover {
+      background-color: #ff6666;
+    }
+
+    /* Web Register (Form yang disembunyikan) */
+    .register-form {
+      position: absolute;
+      top: 20%;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 10px 15px rgba(0, 0, 0, 0.5);
+      width: 300px;
+      color: white;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 1s ease-in-out, pointer-events 1s ease-in-out;
+    }
+
+    .register-form.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .register-form input,
+    .register-form button {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+
+    .register-form input {
+      background-color: #333;
+      color: white;
+    }
+
+    .register-form button {
+      background-color: #ffcc00;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .register-form button:hover {
+      background-color: #ff9900;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Mesin Roulette -->
+    <div class="roulette" id="roulette">
+      <div class="items-container" id="items-container">
+        <div class="item"></div>
+        <div class="item"></div>
+        <div class="item"></div>
+        <div class="item"></div>
+      </div>
+      <button class="spin-btn" id="spin-btn">Spin</button>
+    </div>
+
+    <!-- Form Register yang Tersembunyi -->
+    <div class="register-form" id="register-form">
+      <h2>Daftar untuk Bermain</h2>
+      <form action="/register" method="POST">
+        <input type="text" name="fullname" placeholder="Nama Lengkap" required>
+        <input type="email" name="email" placeholder="Email" required>
+        <input type="password" name="password" placeholder="Kata Sandi" required>
+        <button type="submit">Daftar</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Menambahkan JavaScript untuk efek Spin -->
+  <script>
+    const spinBtn = document.getElementById('spin-btn');
+    const itemsContainer = document.getElementById('items-container');
+    const registerForm = document.getElementById('register-form');
+
+    spinBtn.addEventListener('click', () => {
+      // Reset animasi putar container
+      itemsContainer.style.animation = 'none'; // Hentikan animasi lama
+      itemsContainer.offsetHeight; // Memaksa reflow untuk reset animasi
+      itemsContainer.style.animation = 'spinItems 4s linear infinite'; // Mulai animasi berputar
+
+      // Setelah animasi selesai, tampilkan form register
+      setTimeout(() => {
+        registerForm.classList.add('active');
+      }, 4000); // Form muncul setelah 4 detik
+    });
+  </script>
+</body>
+</html>
